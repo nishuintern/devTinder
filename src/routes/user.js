@@ -24,7 +24,7 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
 userRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
-    const connectionRequest = await connectionRequest
+    const connectionRequests = await connectionRequest
       .find({
         $or: [
           { toUserId: loggedInUser._id, status: "accepted" },
@@ -33,7 +33,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
       })
       .populate("fromUserId", USER_SAFE_DATA)
       .populate("toUserId", USER_SAFE_DATA);
-    const data = connectionRequest.map((row) => {
+    const data = connectionRequests.map((row) => {
       if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
         return row.toUserId;
       }
@@ -52,7 +52,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     const loggedInUser = req.user;
     const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
-    limit = limit < 50 ? 50 : limit;
+    limit = limit > 50 ? 50 : limit;
     const skip = (page - 1) * limit;
     const connectionRequests = await connectionRequest
       .find({

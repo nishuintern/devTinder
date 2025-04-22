@@ -1,6 +1,7 @@
 const socket = require("socket.io");
 const crypto = require("crypto");
-const Chat = require("../../models/Chat");
+const { Chat } = require("../../models/Chat");
+// const ConnectionRequest = require("../models/connectionRequest");
 
 const getSecretRoomId = (userId, targetUserId) => {
   return crypto
@@ -8,6 +9,7 @@ const getSecretRoomId = (userId, targetUserId) => {
     .update([userId, targetUserId].sort().join("$"))
     .digest("hex");
 };
+
 const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
@@ -16,38 +18,46 @@ const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    // Handle events
     socket.on("joinChat", ({ firstName, userId, targetUserId }) => {
-      const roomId = [userId, targetUserId].sort().join("_");
-      console.log(firstName + " joined the chat with id: " + roomId);
+      const roomId = getSecretRoomId(userId, targetUserId);
+      console.log(firstName + " joined Room : " + roomId);
       socket.join(roomId);
     });
+
     socket.on(
       "sendMessage",
-      async ({ firstName, userId, targetUserId, text }) => {
+      async ({ firstName, lastName, userId, targetUserId, text }) => {
+        // Save messages to the database
         try {
           const roomId = getSecretRoomId(userId, targetUserId);
-          console.log(firstName + " sent a message to " + ": " + text);
+          console.log(firstName + " " + text);
+
+          // TODO: Check if userId & targetUserId are friends
+
           let chat = await Chat.findOne({
             participants: { $all: [userId, targetUserId] },
           });
+
           if (!chat) {
             chat = new Chat({
               participants: [userId, targetUserId],
               messages: [],
             });
           }
+
           chat.messages.push({
             senderId: userId,
-            text: text,
+            text,
           });
+
           await chat.save();
           io.to(roomId).emit("messageReceived", { firstName, lastName, text });
-        } catch (error) {
-          console.log(error);
+        } catch (err) {
+          console.log(err);
         }
       }
     );
+
     socket.on("disconnect", () => {});
   });
 };

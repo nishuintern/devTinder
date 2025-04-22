@@ -17,13 +17,11 @@ const messageSchema = new mongoose.Schema(
 
 const chatSchema = new mongoose.Schema({
   participants: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+    { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   ],
   messages: [messageSchema],
 });
+
 const Chat = mongoose.model("Chat", chatSchema);
-module.exports = Chat;
+
+module.exports = {Chat};

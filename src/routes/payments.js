@@ -1,10 +1,9 @@
 const express = require("express");
 const { userAuth } = require("../../middleware/Auth");
 const paymentRouter = express.Router();
-
-const razorpayInstance = require("../utils/Razorpay");
+const razorpayInstance = require('../utils/Razorpay');
 const Payment = require("../../models/payment");
-const { membershipAmount } = require("../utils/constants");
+const { membershipAmount } = require("../utils/constants"); 
 
 paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   try {

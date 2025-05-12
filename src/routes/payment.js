@@ -1,4 +1,5 @@
 const express = require("express");
+const Razorpay = require("razorpay");
 const { userAuth } = require("../../middleware/Auth");
 const paymentRouter = express.Router();
 const Payment = require("../../models/payment");
@@ -7,9 +8,6 @@ const { membershipAmount } = require("../utils/constants");
 const {
   validateWebhookSignature,
 } = require("razorpay/dist/utils/razorpay-utils");
-
-const Razorpay = require("razorpay");
-
 var razorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
   key_secret: process.env.RAZORPAY_KEY_SECRET, // Enter the Key Secret generated from the Dashboard

@@ -21,7 +21,7 @@ const userRouter = require("./routes/user");
 const initializeSocket = require("./utils/socket");
 const chatRouter = require("./routes/Chat");
 const { configDotenv } = require("dotenv");
-const paymentRouter = require("./routes/payments");
+const paymentRouter = require("./routes/payment");
 
 app.use("/", authRouter);
 app.use("/", profileRouter);

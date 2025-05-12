@@ -1,9 +1,11 @@
 const express = require("express");
 const { userAuth } = require("../../middleware/Auth");
 const paymentRouter = express.Router();
-const razorpayInstance = require('../utils/Razorpay');
+const razorpayInstance = require("../utils/Razorpay");
 const Payment = require("../../models/payment");
-const { membershipAmount } = require("../utils/constants"); 
+const { membershipAmount } = require("../utils/constants");
+const { validateWebhookSignature } = require("razorpay");
+const user = require("../../models/User");
 
 paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   try {
@@ -45,11 +47,53 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
     });
 
     const savedPayment = await payment.save();
-    res.json({ ...savedPayment.toJSON(),keyId: process.env.RAZORPAY_KEY_ID });
+    res.json({ ...savedPayment.toJSON(), keyId: process.env.RAZORPAY_KEY_ID });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
+paymentRouter.post("/payment/webhook", async (req, res) => {
+  try {
+    const webhookSignature = req.get("x-razorpay-signature");
+    const isWebhookValid = validateWebhookSignature(
+      JSON.stringify(req.body),
+      webhookSignature,
+      process.env.RAZORPAY_WEBHOOK_SECRET
+    );
+
+    if (!isWebhookValid) {
+      return res.status(400).json({ msg: "Invalid Webhook Signature" });
+    }
+    const paymentDetails = req.body.payload.payment.entity;
+    const payment = await Payment.findOne({
+      orderId: paymentDetails.order_id,
+    });
+    payment.status = paymentDetails.status;
+    await payment.save();
+
+    const user = await user.findOne({
+      _id: payment.userId,
+    });
+    user.isPremium = true;
+    user.membershipType = payment.notes.membershipType;
+    await user.save();
+    // if (req.body.event === "payment.captured") {
+    // }
+    // if (req.body.event === "payment.failed") {
+    // }
+    return res.status(200).json({ msg: "Webhook Received" });
+  } catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+});
+
+paymentRouter.get("/premium/verify", userAuth, (req, res) => {
+  const user = req.user.toJSON();
+  if (user.isPremium) {
+    return res.json({ ...user , isPremium: true });
+  }
+  return res.json({ ...user,isPremium: false });
+});
 module.exports = paymentRouter;

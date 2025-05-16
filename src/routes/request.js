@@ -37,8 +37,15 @@ requestRouter.post(
         status,
       });
       const data = await connectionRequest.save();
+      const emailRes = await sendEmail.run(
+        "A new friend request from " + req.user.firstName,
+        req.user.firstName + " is " + status + " in " + toUser.firstName
+      );
+      console.log(emailRes);
+
       res.json({
-        message: req.user.firstName + " is " + status + " in " + toUser.firstName,
+        message:
+          req.user.firstName + " is " + status + " in " + toUser.firstName,
         data,
       });
     } catch (error) {

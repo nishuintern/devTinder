@@ -6,28 +6,7 @@ const http = require("http");
 require("dotenv").config();
 const PORT = 7777;
 const cors = require("cors");
-// app.use(cors({ origin: "http://localhost:5173",credentials: true }));
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://devtinder-web-zkxd.onrender.com",
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, // If using cookies/session/JWT in headers
-  })
-);
-
+app.use(cors({ origin: "https://devtinder-web-zkxd.onrender.com",credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 // const corsOptions = {

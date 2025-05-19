@@ -7,10 +7,7 @@ require("dotenv").config();
 const PORT = 7777;
 const cors = require("cors");
 const corsOptions = {
-  origin: {
-    "http://localhost:5173": true,
-    "https://devtinder-web-zkxd.onrender.com": true,
-  },
+  origin: ["http://localhost:5173", "https://devtinder-web-zkxd.onrender.com"],
   methods: "GET,POST,PUT,DELETE",
   credentials: true,
   optionSuccessStatus: 200,

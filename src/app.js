@@ -6,7 +6,7 @@ const http = require("http");
 require("dotenv").config();
 const PORT = 7777;
 const cors = require("cors");
-app.use(cors({ origin: "https://devtinder-web-zkxd.onrender.com/",credentials: true }));
+app.use(cors({ origin: "https://devtinder-web-zkxd.onrender.com", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 // const corsOptions = {

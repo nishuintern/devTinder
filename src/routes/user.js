@@ -54,31 +54,41 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     let limit = parseInt(req.query.limit) || 10;
     limit = limit > 50 ? 50 : limit;
     const skip = (page - 1) * limit;
-    const connectionRequests = await connectionRequest
-      .find({
-        $or: [
-          { toUserId: loggedInUser._id, status: "accepted" },
-          { fromUserId: loggedInUser._id, status: "accepted" },
-        ],
-      })
-      .select("fromUserId toUserId");
+
+    // Find all requests where the logged-in user is the sender
+    const sentRequests = await connectionRequest.find({
+      fromUserId: loggedInUser._id,
+    }).select("toUserId");
+
+    // Find all accepted connections (as before)
+    const acceptedConnections = await connectionRequest.find({
+      $or: [
+        { toUserId: loggedInUser._id, status: "accepted" },
+        { fromUserId: loggedInUser._id, status: "accepted" },
+      ],
+    }).select("fromUserId toUserId");
+
+    // Build a set of user IDs to hide
     const hideUsersFromFeed = new Set();
-    connectionRequests.forEach((request) => {
+    acceptedConnections.forEach((request) => {
       hideUsersFromFeed.add(request.fromUserId.toString());
       hideUsersFromFeed.add(request.toUserId.toString());
     });
+    sentRequests.forEach((request) => {
+      hideUsersFromFeed.add(request.toUserId.toString());
+    });
+
+    // Always hide yourself
+    hideUsersFromFeed.add(loggedInUser._id.toString());
+
     const users = await User.find({
-      $and: [
-        {
-          _id: { $nin: Array.from(hideUsersFromFeed) },
-        },
-        { _id: { $ne: loggedInUser._id } },
-      ],
+      _id: { $nin: Array.from(hideUsersFromFeed) },
     })
       .select(USER_SAFE_DATA)
       .skip(skip)
       .limit(limit);
-    res.status(200).json({users});
+
+    res.status(200).json({ users });
   } catch (error) {
     res.status(400).json({
       message: "Error fetching feed" + error.message,

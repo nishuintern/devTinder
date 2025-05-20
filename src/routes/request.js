@@ -34,11 +34,8 @@ requestRouter.post(
       });
       if (existingConnectionRequest) {
         return res
-          .status(200)
-          .json({
-            message: "Connection Request Already Exists!!",
-            data: existingConnectionRequest,
-          });
+          .status(400)
+          .send({ message: "Connection Request Already Exists!!" });
       }
 
       const connectionRequest = new ConnectionRequest({

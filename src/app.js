@@ -6,14 +6,25 @@ const http = require("http");
 require("dotenv").config();
 const PORT = process.env.PORT;
 const cors = require("cors");
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+
+// --- CORS FIX START ---
+const corsOptions = {
+  origin: [
+    "http://localhost:5173", // local frontend
+    "https://your-frontend.onrender.com" // <-- replace with your deployed frontend URL
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+// --- CORS FIX END ---
+
 app.use(express.json());
 app.use(cookieParser());
-// const corsOptions = {
-//   origin: "http://localhost:3000",
-//   method: "POST GET PUT DELETE PATCH",
-//   credentials: true,
-// };
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");

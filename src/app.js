@@ -9,10 +9,11 @@ const cors = require("cors");
 
 // --- CORS FIX START ---
 const corsOptions = {
-  origin: [
-    "http://localhost:5173", // local frontend
-    "https://dev-tinder-web.netlify.app", // <-- replace with your deployed frontend URL
-  ],
+  origin: "https://dev-tinder-web.netlify.app",
+  // [
+  //   "http://localhost:5173", // local frontend
+  //    // <-- replace with your deployed frontend URL
+  // ],
   credentials: true,
 };
 

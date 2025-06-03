@@ -13,14 +13,11 @@ const corsOptions = {
     "http://localhost:5173", // local frontend
     "https://dev-tinder-web.netlify.app", // <-- replace with your deployed frontend URL
   ],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
-  optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+// app.options("*", cors(corsOptions));
 // --- CORS FIX END ---
 
 app.use(express.json());
